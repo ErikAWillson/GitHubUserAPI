@@ -25,31 +25,21 @@ public class FollowersService {
 	public List<Follower> findGitHubIDs(Integer id) {
 		Follower follower = new Follower();
 		follower.setId(id);
-		return processIds(follower, 0);
+		return createFollowersList(follower, 0);
 	}
-	
-	 
-	// Recursive method for finding followers of users
-	private List<Follower> processIds(Follower user, int level) {
-		if (level >= LEVEL_LIMIT) {
-			// No deeper!
-			return null;
-		}
-		
-		// Use Id to get followers
-		Follower[] followerArray = gitHubAPICaller.getFollowers(user.getId());
-		
-		// Set followers to users followerList
-		List<Follower> followerList = Arrays.asList(followerArray);		
-		user.setFollowerList(followerList);
-		
-		// For each follower, go through the same process
-		for (Follower follower : user.getFollowerList()) {
-			processIds(follower, level + 1);
-		}
-		
-		// Put idNode into a List, and return
+
+
+	/**
+	 Recursive method for finding followers of users
+	 */
+	private List<Follower> createFollowersList(Follower user, int level) {
 		List<Follower> userList = new ArrayList<Follower>();
+		if (level >= LEVEL_LIMIT) return userList;
+
+		user.setFollowerList(Arrays.asList(gitHubAPICaller.getFollowers(user.getId())));
+		for (Follower follower : user.getFollowerList())
+			createFollowersList(follower, level + 1);
+
 		userList.add(user);
 		return userList;
 	}
